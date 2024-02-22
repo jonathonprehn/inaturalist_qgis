@@ -3,37 +3,183 @@
  <class>INaturalistUserPluginDockWidgetBase</class>
  <widget class="QDockWidget" name="INaturalistUserPluginDockWidgetBase">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>232</width>
-    <height>141</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>INaturalist for QGIS</string>
-  </property>
-  <widget class="QWidget" name="dockWidgetContents">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Replace this QLabel
-with the desired
-plugin content.</string>
+    <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>232</width>
+      <height>141</height>
+    </rect>
+    </property>
+    <property name="windowTitle">
+    <string>INaturalist for QGIS</string>
       </property>
-     </widget>
+    <widget class="QWidget" name="dockWidgetContents">
+      <layout class="QVBoxLayout" name="dockWidgetTabWidgetLayout">
+      <item>
+        <widget class="QTabWidget" name="dockWidgetTabWidget">
+        <widget class="QWidget" name="tabSearch">
+          <attribute name="title">
+            <string>Search</string>
+          </attribute>
+            
+          <layout class="QVBoxLayout" name="verticalLayout">
+              <property name="spacing">
+              <number>4</number>
+              </property>
+              <property name="leftMargin">
+              <number>0</number>
+              </property>
+              <property name="topMargin">
+              <number>0</number>
+              </property>
+              <property name="rightMargin">
+              <number>0</number>
+              </property>
+              <property name="bottomMargin">
+              <number>4</number>
+              </property>
+              <item>
+                <layout class="QGridLayout" name="searchControls">
+                
+                <item row="0" column="0">
+                  <layout class="QHBoxLayout" name="txtSearchBoxLayout">
+                  <item>
+                    <widget class="QLabel" name="txtSearchBoxLbl">
+                      <property name="text">
+                        <string>Search iNaturalist:</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QLineEdit" name="txtSearchBox">
+                      <property name="toolTip">
+                        <string>Search iNaturalist for observations.</string>
+                      </property>
+                    </widget>
+                  </item>
+                  </layout>
+                </item>
+
+                <item row="0" column="1">
+                    <widget class="QGroupBox" name="groupBoxSearchType">
+                    <property name="title">
+                      <string>Search type</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="groupBoxSearchTypeLayout">
+                      <item>
+                        <widget class="QRadioButton" name="searchTypeObservations">
+                          <property name="text">
+                            <string>Observations</string>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QRadioButton" name="searchTypeSpecies">
+                          <property name="text">
+                          <string>Species</string>
+                          </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QRadioButton" name="searchTypeProjects">
+                          <property name="text">
+                          <string>Projects</string>
+                          </property>
+                        </widget>
+                      </item>
+                    </layout>
+                    </widget>
+                </item>
+            
+
+                <item row="1" column="0">
+                  <widget class="QPushButton" name="btnQueryData">
+                    <property name="text">
+                      <string>Search</string>
+                    </property>
+                  </widget>
+                </item>
+
+                <item row="1" column="1">
+                  <widget class="QCheckBox" name="cbSpatialFilter">
+                    <property name="text">
+                      <string>Use spatial filter</string>
+                    </property>
+                  </widget>
+                </item>
+
+                </layout>
+              </item>
+              <item>
+                <widget class="QListWidget" name="searchResult">
+                  <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                  </sizepolicy>
+                  </property>
+                  <property name="alternatingRowColors">
+                  <bool>true</bool>
+                  </property>
+                  <property name="iconSize">
+                  <size>
+                    <width>24</width>
+                    <height>24</height>
+                  </size>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QWidget" name="paginationControls">
+                  <layout class="QHBoxLayout" name="paginationControlsLayout">
+                      <item>
+                        <widget class="QPushButton" name="paginationPrevPage">
+                            <property name="text">
+                                <string>Previous</string>
+                            </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QLabel" name="paginationPageLabel">
+                            <property name="text">
+                                <string>Page 1</string>
+                            </property>
+                        </widget>
+                      </item>
+                      <item>
+                        <widget class="QPushButton" name="paginationNextPage">
+                            <property name="text">
+                                <string>Next</string>
+                            </property>
+                        </widget>
+                      </item>
+                  </layout>
+                </widget>
+              </item>
+            </layout>
+            </widget><!--end tab 1-->
+            
+            <widget class="QWidget" name="tabAdditionalFiltering">
+              <attribute name="title">
+                <string>Additional Filtering</string>
+              </attribute>
+              
+              <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                  <widget class="QLabel" name="testLbl">
+                    <property name="text">
+                      <string>Nothing here yet!</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+          </widget><!--end tab 2-->
+
+        </widget><!--end tab widget-->
     </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="btnQueryData">
-      <property name="text">
-      <string>Do something</string>
-      </property>
-      </widget>
-    </item>
-   </layout>
-  </widget>
- </widget>
+    </layout>
+  </widget><!--end dock contents-->
+ </widget><!--end dock itself-->
  <resources/>
  <connections/>
 </ui>

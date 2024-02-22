@@ -41,6 +41,8 @@ from .inaturalist_qgis_dockwidget import INaturalistUserPluginDockWidget
 import os.path
 
 
+# api docs
+# https://api.inaturalist.org/v1/docs/
 
 
 class INaturalistUserPlugin:
@@ -241,7 +243,7 @@ class INaturalistUserPlugin:
             #    removed on close (see self.onClosePlugin method)
             if self.dockwidget == None:
                 # Create the dockwidget (after translation) and keep reference
-                self.dockwidget = INaturalistUserPluginDockWidget()
+                self.dockwidget = INaturalistUserPluginDockWidget(parent=self.iface.mainWindow())
 
             # connect to provide cleanup on closing of dockwidget
             self.dockwidget.closingPlugin.connect(self.onClosePlugin)

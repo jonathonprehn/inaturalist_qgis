@@ -26,16 +26,24 @@ import os
 import requests 
 
 from qgis.PyQt import QtGui, QtWidgets, uic
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import (
+    pyqtSignal,
+    Qt
+)
+
+from qgis.PyQt.QtWidgets import (
+    QListWidgetItem,
+    QLabel
+)
 
 
 from qgis.core import (
     QgsApplication,
-    QgsMessageLog
+    QgsMessageLog,
+    Qgis
 )
 
-from .observations import (
-    Observation,
+from .observation_search_query import (
     ObservationSearchQuery
 )
 
@@ -64,9 +72,24 @@ class INaturalistUserPluginDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         self.pluginClass = None
         self.apiKey = None  # this is only needed for PUT and POST requests, which won't be done by this really
-        self.apiRoot = "https://api.inaturalist.org/v1/"  # this won't change
+        self.apiRoot = "https://api.inaturalist.org/v1"  # this won't change
+        self.btnQueryData.pressed.connect(self.do_query) # link search button 
+        self.searchTypeObservations.setChecked(True) # set observations search by default, but can update this later
+        self.paginationPrevPage.pressed.connect(self.prevPage)
+        self.paginationNextPage.pressed.connect(self.nextPage)
+        self.paginationControls.setVisible(False)
+
         self.activeObservationQuery = None
-        self.btnQueryData.pressed.connect(self.query_observations)
+
+
+
+    def do_query(self):
+        if self.searchTypeObservations.isChecked():
+            self.query_observations()
+        elif self.searchTypeSpecies.isChecked():
+            self.query_species()
+        elif self.searchTypeProjects.isChecked():
+            self.query_projects()
 
 
 
@@ -75,9 +98,102 @@ class INaturalistUserPluginDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.activeObservationQuery is None:
             self.activeObservationQuery = ObservationSearchQuery(self.apiRoot)
 
-        QgsApplication.instance().messageLog().logMessage("Ran INaturalistUserPluginDockWidget.query_observations")
+        searchText = self.txtSearchBox.text()
+        QgsApplication.instance().messageLog().logMessage(f"search text is {searchText}", level=Qgis.Info)
+        self.activeObservationQuery.q = searchText
+        self.on_page = 1   # reset page since its a new search
+        self.activeObservationQuery.query()  # make this a separate thread (see how qms does it)
+        self.refresh_search_results_page()
+        
+        
+            
+    def refresh_search_results_page(self):
+        self.searchResult.clear()
+        if self.activeObservationQuery.last_query_error() is None:
+            resultCount = self.activeObservationQuery.query_total_results()
+            QgsApplication.instance().messageLog().logMessage(f"Got {resultCount} observations", level=Qgis.Info)
+            if resultCount > 0:
+                # fill this page with results and activate pagination controls (how does that work?)
+                self.on_page = self.activeObservationQuery.query_page_number()
+                page_results = self.activeObservationQuery.get_current_page_results();
+                for observation in page_results:
+
+                    # this part was taken and modified from qms_service_toolbox.py, QuickMapServices plugin (thank you)
+
+                    new_widget = QLabel()
+                    new_widget.setTextFormat(Qt.RichText)
+                    new_widget.setOpenExternalLinks(True)
+                    new_widget.setWordWrap(True)
+
+                    display_name = ""
+                    if "taxon" in observation and observation["taxon"] is not None and "name" in observation["taxon"]:
+                        display_name = observation["taxon"]["name"]
+                    else:
+                        # what now?
+                        display_name = "&lt;No agreed name yet&gt;"; # I think? Need to find out what having no name means..
+                        QgsApplication.instance().messageLog().logMessage(f"Result has no taxon/name? (id={observation['id']})")
 
 
+                    new_widget.setText(
+                        "<div><a href=\"{0}\">{1}</a></div>".format(
+                            observation["uri"],
+                            display_name
+                        )
+                    )
+                    new_item = QListWidgetItem(self.searchResult)
+                    new_item.setSizeHint(new_widget.sizeHint())
+                    self.searchResult.addItem(new_item)
+                    self.searchResult.setItemWidget(
+                        new_item,
+                        new_widget
+                    )
+
+                self.paginationControls.setVisible(True)
+                self.paginationPageLabel.setText("Page " + str(self.on_page) + "/" + str(self.activeObservationQuery.query_max_pages()))
+
+            else:
+                pass # no results, report it somehow 
+
+        else:
+            QgsApplication.instance().messageLog().logMessage("An error occurred while querying observations.")
+        self.searchResult.update()
+
+    
+    def query_species(self):
+        pass 
+
+
+
+    def query_projects(self):
+        pass 
+
+
+    def prevPage(self):
+        QgsApplication.instance().messageLog().logMessage("prev page", level=Qgis.Info)
+        if self.activeObservationQuery.last_query_error() is None:
+            if self.activeObservationQuery.prev_page():
+                # query again and refresh pagination
+                QgsApplication.instance().messageLog().logMessage("doing a query for prev page now", level=Qgis.Info)
+                self.activeObservationQuery.query()  # make this a separate thread (see how qms does it)
+                self.refresh_search_results_page()
+            else:
+                QgsApplication.instance().messageLog().logMessage("prev page returned false", level=Qgis.Info)
+        else:
+            QgsApplication.instance().messageLog().logMessage("last_query_error", level=Qgis.Info)
+
+
+    def nextPage(self):
+        QgsApplication.instance().messageLog().logMessage("next page", level=Qgis.Info)
+        if self.activeObservationQuery.last_query_error() is None:
+            if self.activeObservationQuery.next_page():
+                # query again and refresh pagination
+                QgsApplication.instance().messageLog().logMessage("doing a query for next page now", level=Qgis.Info)
+                self.activeObservationQuery.query()  # make this a separate thread (see how qms does it)
+                self.refresh_search_results_page()
+            else:
+                QgsApplication.instance().messageLog().logMessage("next_page returned false", level=Qgis.Info)
+        else:
+            QgsApplication.instance().messageLog().logMessage("last_query_error", level=Qgis.Info)
 
 
     def closeEvent(self, event):
